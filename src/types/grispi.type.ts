@@ -131,7 +131,7 @@ interface Context {
   token: string;
 }
 
-export interface GrispiData {
+export interface GrispiBundle {
   settings: Settings;
   context: Context;
 }

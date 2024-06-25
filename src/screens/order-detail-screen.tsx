@@ -15,12 +15,13 @@ import { cn, formatDistance } from "@/lib/utils";
 
 export const OrderDetailScreen = observer(() => {
   const {
+    orders,
     shipmentTrackingDetail,
     selectedOrder,
     setSelectedOrderCode,
     setShipmentTrackingDetail,
   } = useStore().order;
-  const { ticket, settings } = useGrispi();
+  const { settings } = useGrispi();
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -53,7 +54,11 @@ export const OrderDetailScreen = observer(() => {
 
   return (
     <Screen>
-      <ScreenHeader onBack={() => setSelectedOrderCode(null)}>
+      <ScreenHeader
+        onBack={
+          orders.length === 1 ? undefined : () => setSelectedOrderCode(null)
+        }
+      >
         <ScreenTitle>{selectedOrder?.company_name}</ScreenTitle>
       </ScreenHeader>
       <ScreenContent>
@@ -61,14 +66,12 @@ export const OrderDetailScreen = observer(() => {
         {!loading && (
           <div className="my-2 space-y-2">
             <div className="space-y-1 bg-white p-3 shadow">
-              <h3 className="text-sm font-medium text-muted-foreground">
+              <h3 className="text-xs font-medium text-muted-foreground">
                 Gönderici
               </h3>
               <div>
-                <div className="text-lg">
-                  {shipmentTrackingDetail?.sender_name}
-                </div>
-                <div className="flex flex-col">
+                <div>{shipmentTrackingDetail?.sender_name}</div>
+                <div className="flex flex-col *:text-sm">
                   <span>{shipmentTrackingDetail?.sender_email}</span>
                   <span>{shipmentTrackingDetail?.sender_telephone}</span>
                   <span>{shipmentTrackingDetail?.sender_address}</span>
@@ -76,14 +79,12 @@ export const OrderDetailScreen = observer(() => {
               </div>
             </div>
             <div className="space-y-1 bg-white p-3 shadow">
-              <h3 className="text-sm font-medium text-muted-foreground">
+              <h3 className="text-xs font-medium text-muted-foreground">
                 Alıcı
               </h3>
               <div>
-                <div className="text-lg">
-                  {shipmentTrackingDetail?.receiver_name}
-                </div>
-                <div className="flex flex-col">
+                <div>{shipmentTrackingDetail?.receiver_name}</div>
+                <div className="flex flex-col *:text-sm">
                   <span>{shipmentTrackingDetail?.receiver_email}</span>
                   <span>{shipmentTrackingDetail?.receiver_telephone}</span>
                   <span>{shipmentTrackingDetail?.receiver_address}</span>
@@ -111,20 +112,19 @@ export const OrderDetailScreen = observer(() => {
                       </span>
                       <div className="block">
                         <div
-                          className={cn({
+                          className={cn("text-sm", {
                             "text-primary": log.shipment_status_code === "7",
                           })}
                         >
                           {log.shipment_status}
                         </div>
-                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <div className="flex flex-col text-xs text-muted-foreground">
                           <span>
                             {log.location_county}, {log.location_city}
                           </span>
-                          <span>&bull;</span>
                           <span>{formatDistance(log.document_date)}</span>
                         </div>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col text-xs">
                           <span>{log.location_phone}</span>
                           {log.undelivered_reason && (
                             <span className="text-destructive">

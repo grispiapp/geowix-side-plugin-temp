@@ -14,7 +14,7 @@ import { useStore } from "@/contexts/store-context";
 import { getOrders } from "@/lib/geowix";
 
 export const OrdersScreen = observer(() => {
-  const { orders, setOrders } = useStore().order;
+  const { orders, setOrders, setSelectedOrderCode } = useStore().order;
   const { ticket, settings, loading: grispiLoading } = useGrispi();
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -44,12 +44,16 @@ export const OrdersScreen = observer(() => {
 
       const orders = await getOrders({
         apikey: settings.apikey,
-        prm: orderNumber ?? trackingCode,
+        prm: orderNumber ?? trackingCode ?? phoneNumber,
       });
 
       setOrders(orders.datav);
       setLoading(false);
       setError(null);
+
+      if (orders.datav.length === 1) {
+        setSelectedOrderCode(orders.datav[0].order_code);
+      }
     };
 
     handleFetchOrders();

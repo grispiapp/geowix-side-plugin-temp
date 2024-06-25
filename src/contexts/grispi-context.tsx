@@ -6,16 +6,18 @@ import React, {
   useState,
 } from "react";
 
-import { GrispiClient } from "@/lib/grispi";
-import { GrispiData, Settings, Ticket } from "@/types/grispi.type";
+import { grispiAPI } from "@/grispi/client/api";
+import { GrispiBundle, Settings, Ticket } from "@/types/grispi.type";
 
-type GrispiContext = {
+type GrispiContextType = {
   ticket: Ticket | null;
   settings: Settings | null;
   loading: boolean;
 };
 
-const GrispiContext = createContext<GrispiContext | null>(null);
+const GrispiContext = createContext<GrispiContextType | null>(null);
+
+const plugin = window.GrispiClient.instance();
 
 export const GrispiProvider: React.FC<{
   children: ReactNode;
@@ -25,22 +27,36 @@ export const GrispiProvider: React.FC<{
   const [settings, setSettings] = useState<Settings | null>(null);
 
   useEffect(() => {
-    GrispiClient.instance()
-      ._init()
-      .then((data: GrispiData) => {
-        setTicket(data.context.ticket);
-        setSettings(data.settings);
-        setLoading(false);
+    plugin._init().then(async (bundle: GrispiBundle) => {
+      grispiAPI.authentication.setTenantId(bundle.context.tenantId);
+      grispiAPI.authentication.setToken(bundle.context.token);
 
-        GrispiClient.instance().activeTicketChanged = function (
-          ticket: Ticket
-        ) {
-          setTicket(ticket);
-        };
-      })
-      .catch((err) => {
-        console.error({ err });
-      });
+      const ticket = await grispiAPI.tickets.getTicket(
+        bundle.context.ticketKey
+      );
+
+      setTicket(ticket);
+      setSettings(bundle.settings);
+      setLoading(false);
+    });
+
+    plugin.currentTicketUpdated = async (ticket: Ticket) => {
+      setLoading(true);
+
+      try {
+        const response = await grispiAPI.tickets.getTicket(ticket.key);
+        setTicket(response);
+      } catch (err) {
+        console.error(
+          "grispi-context",
+          "currentTicketUpdated",
+          "Error when fetching ticket details",
+          ticket.key
+        );
+      }
+
+      setLoading(false);
+    };
   }, []);
 
   return (
