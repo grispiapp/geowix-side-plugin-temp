@@ -2,11 +2,13 @@
 
 ```json
 {
-  "pluginId": "com.grispi.geowix",
+  "title": "Geowix",
+  "src": "https://grispi.app/geowix-side-plugin/build/",
   "uiDefinition": {
-    "height": 600
+    "height": 900
   },
-  "src": "https://grispi.app/geowix-side-plugin/build/"
+  "singleton": false,
+  "lazy": true
 }
 ```
 
