@@ -21,19 +21,19 @@ export const OrderDetailScreen = observer(() => {
     setSelectedOrderCode,
     setShipmentTrackingDetail,
   } = useStore().order;
-  const { settings } = useGrispi();
+  const { bundle } = useGrispi();
 
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!selectedOrder?.tracking_code) return;
-    if (!settings?.apikey) return;
+    if (!bundle?.settings?.apikey) return;
 
     const handleFetchShipmentTracking = async () => {
       setLoading(true);
 
       const order = await getShipmentTracking({
-        apikey: settings.apikey,
+        apikey: bundle.settings.apikey as string,
         tracking_code: selectedOrder.tracking_code,
       });
 
@@ -42,7 +42,7 @@ export const OrderDetailScreen = observer(() => {
     };
 
     handleFetchShipmentTracking();
-  }, [selectedOrder, settings]);
+  }, [selectedOrder, bundle]);
 
   const sortedLogs = shipmentTrackingDetail?.logs
     ? [...shipmentTrackingDetail.logs].sort(

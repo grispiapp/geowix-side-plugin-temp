@@ -1,4 +1,8 @@
-export interface Settings extends Record<string, any> {}
+export interface Settings
+  extends Record<
+    string,
+    string | number | string[] | number[] | boolean[] | boolean | Settings
+  > {}
 
 interface Role {
   authority: string;
@@ -6,7 +10,7 @@ interface Role {
   teamUser: boolean;
 }
 
-interface User {
+export interface User {
   role: Role;
   groups: any[];
   id: number;
@@ -55,11 +59,6 @@ interface Comment {
   mentionedUsers: any[];
   channel: string;
   externalId: string;
-}
-
-interface Group {
-  id: number;
-  name: string;
 }
 
 interface FieldMap {
@@ -117,18 +116,17 @@ interface Agent {
 interface Requester {
   id: number;
   fullName: string;
-  email: any;
-  phone: any;
+  email?: string;
+  phone?: string;
 }
 
 interface Context {
   username: string;
   tenantId: string;
+  token: string;
   ticketKey: string;
-  ticket: Ticket;
   agent: Agent;
   requester: Requester;
-  token: string;
 }
 
 export interface GrispiBundle {

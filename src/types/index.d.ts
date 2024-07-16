@@ -1,3 +1,3 @@
 interface Window {
-  GrispiClient: any;
+  Grispi: any;
 }

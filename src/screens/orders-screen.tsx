@@ -15,14 +15,14 @@ import { getOrders } from "@/lib/geowix";
 
 export const OrdersScreen = observer(() => {
   const { orders, setOrders, setSelectedOrderCode } = useStore().order;
-  const { ticket, settings, loading: grispiLoading } = useGrispi();
+  const { ticket, bundle, loading: grispiLoading } = useGrispi();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleFetchOrders = async () => {
-      if (!ticket || !settings?.apikey) {
+      if (!ticket || !bundle?.settings?.apikey) {
         setError("Talep bilgisine ulaşılamadı.");
         setLoading(false);
         return;
@@ -30,7 +30,9 @@ export const OrdersScreen = observer(() => {
 
       const orderNumber = ticket.fieldMap["tu.order_number"]?.value;
       const trackingCode = ticket.fieldMap["tu.tracking_code"]?.value;
-      const phoneNumber = null;
+      const phoneNumber = bundle.context.requester.phone?.startsWith("+90")
+        ? bundle.context.requester.phone.replace("+90", "")
+        : null;
 
       if (!orderNumber && !trackingCode && !phoneNumber) {
         setError(
@@ -43,13 +45,30 @@ export const OrdersScreen = observer(() => {
       setLoading(true);
 
       const orders = await getOrders({
-        apikey: settings.apikey,
+        apikey: bundle.settings.apikey as string,
         prm: orderNumber ?? trackingCode ?? phoneNumber,
       });
 
+      if (orders.datav.length === 0) {
+        if (orderNumber) {
+          setError(
+            "Kullanıcının sipariş numarasıyla ilişkili bir kayıt bulunamadı."
+          );
+        } else if (trackingCode) {
+          setError(
+            "Kullanıcının takip numarasıyla ilişkili sipariş kaydı bulunamadı."
+          );
+        } else {
+          setError(
+            "Kullanıcının telefon numarasıyla ilişkili sipariş kaydı bulunamadı."
+          );
+        }
+      } else {
+        setError(null);
+      }
+
       setOrders(orders.datav);
       setLoading(false);
-      setError(null);
 
       if (orders.datav.length === 1) {
         setSelectedOrderCode(orders.datav[0].order_code);
@@ -57,7 +76,7 @@ export const OrdersScreen = observer(() => {
     };
 
     handleFetchOrders();
-  }, [ticket, settings]);
+  }, [ticket, bundle]);
 
   const isLoading = loading || grispiLoading;
 

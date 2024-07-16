@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/geowix-side-plugin/build/static/css/main.b87aef1a.css",
-    "main.js": "/geowix-side-plugin/build/static/js/main.8e7d706d.js",
+    "main.css": "/geowix-side-plugin/build/static/css/main.6a04d209.css",
+    "main.js": "/geowix-side-plugin/build/static/js/main.cb17410b.js",
     "index.html": "/geowix-side-plugin/build/index.html",
-    "main.b87aef1a.css.map": "/geowix-side-plugin/build/static/css/main.b87aef1a.css.map",
-    "main.8e7d706d.js.map": "/geowix-side-plugin/build/static/js/main.8e7d706d.js.map"
+    "main.6a04d209.css.map": "/geowix-side-plugin/build/static/css/main.6a04d209.css.map",
+    "main.cb17410b.js.map": "/geowix-side-plugin/build/static/js/main.cb17410b.js.map"
   },
   "entrypoints": [
-    "static/css/main.b87aef1a.css",
-    "static/js/main.8e7d706d.js"
+    "static/css/main.6a04d209.css",
+    "static/js/main.cb17410b.js"
   ]
 }
