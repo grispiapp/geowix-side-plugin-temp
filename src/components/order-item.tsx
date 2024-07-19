@@ -1,5 +1,6 @@
 import { Button } from "./ui/button";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
+import { format } from "date-fns";
 import { observer } from "mobx-react-lite";
 import { FC } from "react";
 
@@ -21,7 +22,7 @@ export const OrderItem: FC<OrderItemProps> = observer(({ order }) => {
           <div>
             <h2 className="text-xl font-medium">{order.company_name}</h2>
             <div className="text-muted-foreground">
-              {formatDistance(order.date)}
+              {format(order.date, "dd.MM.yyyy HH:mm")}
             </div>
           </div>
           <div className="flex flex-col">

@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 
@@ -122,7 +123,9 @@ export const OrderDetailScreen = observer(() => {
                           <span>
                             {log.location_county}, {log.location_city}
                           </span>
-                          <span>{formatDistance(log.document_date)}</span>
+                          <span>
+                            {format(log.document_date, "dd.MM.yyyy HH:mm")}
+                          </span>
                         </div>
                         <div className="flex flex-col text-xs">
                           <span>{log.location_phone}</span>

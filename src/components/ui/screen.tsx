@@ -39,15 +39,15 @@ export const ScreenHeader: FC<ScreenHeaderProps> = ({
         className
       )}
     >
-      <div className="flex-1">
-        {onBack && (
+      {onBack && (
+        <div className="flex-1">
           <Button onClick={onBack} size="icon">
             <ChevronLeftIcon className="size-6" />
           </Button>
-        )}
-      </div>
+        </div>
+      )}
       <div className="line-clamp-2 flex-[2] text-center">{children}</div>
-      <div className="flex-1" />
+      {onBack && <div className="flex-1" />}
     </div>
   );
 };
