@@ -14,6 +14,6 @@ export class HttpHandler {
       return await response.json();
     }
 
-    return null;
+    throw new Error("Http Error");
   }
 }

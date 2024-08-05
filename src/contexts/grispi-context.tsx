@@ -7,7 +7,8 @@ import React, {
 } from "react";
 
 import { grispiAPI } from "@/grispi/client/api";
-import { GrispiBundle, Settings, Ticket } from "@/types/grispi.type";
+import { Ticket } from "@/grispi/client/tickets/tickets.type";
+import { GrispiBundle } from "@/types/grispi.type";
 
 type GrispiContextType = {
   ticket: Ticket | null;

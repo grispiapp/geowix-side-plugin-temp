@@ -1,8 +1,11 @@
+import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 
 import { LoadingWrapper } from "@/components/loading-wrapper";
+import { Button } from "@/components/ui/button";
 import {
   Screen,
   ScreenContent,
@@ -11,8 +14,10 @@ import {
 } from "@/components/ui/screen";
 import { useGrispi } from "@/contexts/grispi-context";
 import { useStore } from "@/contexts/store-context";
+import { grispiAPI } from "@/grispi/client/api";
+import { UpdateTicketPayload } from "@/grispi/client/tickets/tickets.type";
 import { getShipmentTracking } from "@/lib/geowix";
-import { cn, formatDistance } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export const OrderDetailScreen = observer(() => {
   const {
@@ -22,9 +27,60 @@ export const OrderDetailScreen = observer(() => {
     setSelectedOrderCode,
     setShipmentTrackingDetail,
   } = useStore().order;
-  const { bundle } = useGrispi();
+  const { bundle, ticket } = useGrispi();
 
   const [loading, setLoading] = useState<boolean>(true);
+  const [syncLoading, setSyncLoading] = useState<boolean>(false);
+
+  const sortedLogs = useMemo(() => {
+    return shipmentTrackingDetail?.logs
+      ? [...shipmentTrackingDetail.logs].sort(
+          (a, b) =>
+            new Date(b.document_date).getTime() -
+            new Date(a.document_date).getTime()
+        )
+      : [];
+  }, [shipmentTrackingDetail]);
+
+  const startingLog = shipmentTrackingDetail?.logs?.[0];
+
+  const arrivalLog = useMemo(
+    () =>
+      shipmentTrackingDetail?.logs.find(
+        (log) => log.shipment_status_code === "2"
+      ),
+    [shipmentTrackingDetail?.logs]
+  );
+
+  const syncInformations = useMemo(
+    () => [
+      {
+        title: "Başlangıç Şubesi",
+        exists: startingLog?.location_name,
+      },
+      {
+        title: "Varış Şubesi",
+        exists: arrivalLog?.location_name,
+      },
+      // {
+      //   title: "Teslimat Durumu",
+      //   exists: shipmentTrackingDetail?.shipment_status,
+      // },
+      {
+        title: "Sürücü Adı",
+        exists: shipmentTrackingDetail?.driver,
+      },
+      {
+        title: "Sipariş Numarası",
+        exists: true,
+      },
+      {
+        title: "Kargo Takip Numarası",
+        exists: true,
+      },
+    ],
+    [startingLog, arrivalLog, shipmentTrackingDetail]
+  );
 
   useEffect(() => {
     if (!selectedOrder?.tracking_code) return;
@@ -45,13 +101,69 @@ export const OrderDetailScreen = observer(() => {
     handleFetchShipmentTracking();
   }, [selectedOrder, bundle]);
 
-  const sortedLogs = shipmentTrackingDetail?.logs
-    ? [...shipmentTrackingDetail.logs].sort(
-        (a, b) =>
-          new Date(b.document_date).getTime() -
-          new Date(a.document_date).getTime()
-      )
-    : [];
+  const handleSyncWithGrispi = async () => {
+    if (!ticket) return;
+    if (!shipmentTrackingDetail) return;
+    if (!selectedOrder) return;
+
+    setSyncLoading(true);
+
+    const fields: UpdateTicketPayload["fields"] = [
+      {
+        key: "tu.tracking_code",
+        value: shipmentTrackingDetail.tracking_code,
+      },
+      {
+        key: "tu.order_number",
+        value: selectedOrder.order_code,
+      },
+    ];
+
+    if (startingLog?.location_name) {
+      fields.push({
+        key: "tu.baslangc_subesi",
+        value: startingLog.location_name,
+      });
+    }
+
+    if (arrivalLog?.location_name) {
+      fields.push({
+        key: "tu.vars_subesi",
+        value: arrivalLog.location_name,
+      });
+    }
+
+    // if (shipmentTrackingDetail.shipment_status) {
+    //   fields.push({
+    //     key: "tu.teslimat_durumu",
+    //     value: shipmentTrackingDetail.shipment_status,
+    //   });
+    // }
+
+    if (shipmentTrackingDetail.driver) {
+      fields.push({
+        key: "tu.surucu_ad",
+        value: shipmentTrackingDetail.driver,
+      });
+    }
+
+    try {
+      const promise = grispiAPI.tickets.updateTicket(ticket.key, {
+        fields,
+      });
+
+      await toast.promise(promise, {
+        loading: "Gönderiliyor...",
+        success:
+          "Gönderildi. Güncel bilgileri görmek için lütfen sayfayı yenileyin.",
+        error: "Bir hata oluştu.",
+      });
+    } catch (err) {
+      //
+    } finally {
+      setSyncLoading(false);
+    }
+  };
 
   return (
     <Screen>
@@ -66,6 +178,31 @@ export const OrderDetailScreen = observer(() => {
         {loading && <LoadingWrapper />}
         {!loading && (
           <div className="my-2 space-y-2">
+            <div className="space-y-3 bg-white p-3 shadow">
+              <div className="text-sm text-muted-foreground">
+                Aşağıdaki bilgileri Grispi'ye gönderebilirsiniz.
+              </div>
+              <ul className="text-sm text-gray-400">
+                {syncInformations.map((info) => (
+                  <li
+                    key={info.title}
+                    className={cn("flex items-center gap-1", {
+                      "text-green-500": info.exists,
+                    })}
+                  >
+                    {info.exists ? <CheckCircledIcon /> : <CrossCircledIcon />}
+                    <span>{info.title}</span>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                size="sm"
+                onClick={handleSyncWithGrispi}
+                disabled={syncLoading}
+              >
+                Grispi'ye Gönder
+              </Button>
+            </div>
             <div className="space-y-1 bg-white p-3 shadow">
               <h3 className="text-xs font-medium text-muted-foreground">
                 Gönderici

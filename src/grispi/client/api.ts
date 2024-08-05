@@ -1,6 +1,6 @@
 import { Authentication } from "./authentication";
 import { HttpHandler } from "./http-handler";
-import { Tickets } from "./tickets";
+import { Tickets } from "./tickets/tickets";
 
 export class GrispiAPI {
   private httpHandler: HttpHandler;

@@ -1,6 +1,7 @@
 import { GrispiProvider } from "./contexts/grispi-context";
 import { StoreProvider } from "./contexts/store-context";
 import { ScreenManager } from "./screens/screen-manager";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
@@ -8,6 +9,7 @@ const App = () => {
       <GrispiProvider>
         <ScreenManager />
       </GrispiProvider>
+      <Toaster />
     </StoreProvider>
   );
 };
