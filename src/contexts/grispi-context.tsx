@@ -42,18 +42,18 @@ export const GrispiProvider: React.FC<{
       setLoading(false);
     });
 
-    plugin.currentTicketUpdated = async (ticket: Ticket) => {
+    plugin.currentTicketUpdated = async (ticketKey: string) => {
       setLoading(true);
 
       try {
-        const response = await grispiAPI.tickets.getTicket(ticket.key);
+        const response = await grispiAPI.tickets.getTicket(ticketKey);
         setTicket(response);
       } catch (err) {
         console.error(
           "grispi-context",
           "currentTicketUpdated",
           "Error when fetching ticket details",
-          ticket.key
+          ticketKey
         );
       }
 
