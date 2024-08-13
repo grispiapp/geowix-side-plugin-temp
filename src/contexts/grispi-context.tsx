@@ -31,6 +31,11 @@ export const GrispiProvider: React.FC<{
     plugin.init().then(async (bundle: GrispiBundle) => {
       setBundle(bundle);
 
+      if (!bundle.context.ticketKey) {
+        setLoading(false);
+        return;
+      }
+
       grispiAPI.authentication.setTenantId(bundle.context.tenantId);
       grispiAPI.authentication.setToken(bundle.context.token);
 
