@@ -3,7 +3,7 @@
 ```json
 {
   "title": "Geowix",
-  "src": "https://grispi.app/geowix-side-plugin/build/",
+  "src": "https://grispi.app/geowix-side-plugin-temp/build/",
   "uiDefinition": {
     "height": 900
   },
